@@ -3,7 +3,7 @@ import React, { Suspense } from "react";
 
 import Navbar from "../components/ui/Navbar";
 import PersonalityMatch from "../components/ui/PersonalityMatch";
-import { SparklesCore } from "../components/ui/Sparkles";
+import { SparklesCore } from "../components/ui/sparkles";
 import Loader from "../components/ui/Loading";
 
 export default function Home() {
