@@ -1,10 +1,13 @@
 "use client";
-import React from "react";
-import { SparklesCore } from "@/components/ui/sparkles";
-import Navbar from "@/components/ui/Navbar";
-import PersonalityMatch from "@/components/ui/PersonalityMatch";
+import React, { Suspense } from "react";
 
-export default function SparklesPreview() {
+import Navbar from "../components/ui/Navbar";
+import PersonalityMatch from "../components/ui/PersonalityMatch";
+import { SparklesCore } from "../components/ui/Sparkles";
+import Loader from "../components/ui/Loading";
+
+export default function Home() {
+
   return (
     <div className="min-h-screen relative w-full bg-black flex flex-col items-center justify-center overflow-hidden rounded-md">
       <div className="w-full absolute inset-0 h-screen">
@@ -19,7 +22,9 @@ export default function SparklesPreview() {
         />
       </div>
       <Navbar />
-      <PersonalityMatch/>
+      <Suspense fallback={<Loader variant={'spinner'} size={'large'}/>}>
+        <PersonalityMatch />
+      </Suspense>
     </div>
   );
 }

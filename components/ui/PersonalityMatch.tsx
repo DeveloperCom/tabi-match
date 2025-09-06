@@ -1,38 +1,24 @@
 "use client";
 import React, { useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion} from "motion/react";
 import { useSearchParams } from "next/navigation";
 
 const rollImages: string[] = Array.from({ length: 14 }, (_, i) => `/roll/roll${i + 1}.jpg`);
-const tabizenLogo = "/tabizen-logo.jpg";
-
-async function toBase64(url: string): Promise<string> {
-  const response = await fetch(url);
-  const arrayBuffer = await response.arrayBuffer();
-  // Guess mime type (png/jpg/svg)
-  let mime = "image/png";
-  if (url.endsWith(".jpg") || url.endsWith(".jpeg")) mime = "image/jpeg";
-  if (url.endsWith(".svg")) mime = "image/svg+xml";
-  const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-  return `data:${mime};base64,${base64}`;
-}
+const tabizenLogo = "/tabizen-logo.svg";
 
 export default function PersonalityMatch() {
 
-  const searchParams = useSearchParams(); // ReadonlyURLSearchParams
-  const param = searchParams.get('customOutput'); // string | null
-  const parsed = param !== null ? parseInt(param, 10) : NaN;
+  const searchParams = useSearchParams();
+  const param = searchParams.get('customOutput');
+    const parsed = param !== null ? parseInt(param, 10) : NaN;
 
   const [userImage, setUserImage] = useState<string | null>(null);
   const [isRolling, setIsRolling] = useState(false);
   const [hasRolled, setHasRolled] = useState(false);
-  const [matchImage, setMatchImage] = useState<string | null>(null);
   const [matchIdx, setMatchIdx] = useState(0);
   const [score, setScore] = useState<number | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
 
   // Image upload from file
   const onUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,7 +64,6 @@ export default function PersonalityMatch() {
 
           console.log( {winner, parsed, img:rollImages[winner]});
           setMatchIdx(winner);
-          setMatchImage(rollImages[winner]);
           setScore(Math.floor(83 + Math.random() * 13));
           setIsRolling(false);
           setHasRolled(true);
@@ -114,81 +99,9 @@ export default function PersonalityMatch() {
   };
 
 
-  // Build a simple static HTML for screenshot
-  const makeScreenshotHTML = (image: string) => `
-
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Tabichain Personality Match</title>
-  <style>
-    body { background: #18181b; color: #fff; font-family: 'Inter',sans-serif; margin:0; }
-    .card { border-radius: 30px; box-shadow:0 6px 42px #0008; margin: 48px auto; background: #14101a; width: 330px; padding: 2em 1em 1.5em 1em; text-align: center; }
-    .row { display:flex; flex-direction: row; justify-content: center; align-items:center; gap: 18px; margin: 0.8em 0; }
-    .imgbox { width: 90px; height:90px; border-radius:20px; border:4px solid #FF2572; background:#24182b; display:flex;align-items:center;justify-content:center;overflow:hidden }
-    .imgbox2 { border-color: #2572FF;}
-    .vs { font-weight:bold; font-size:1.3em; color:#FF2572;}
-    .score { color:#2572FF; font-size:2.2em; font-family:sans-serif; font-weight:bold;margin:0.3em 0}
-    .txt {color:#F3D3E0;}
-  </style>
-</head>
-<body>
-<div class="card">
-  <h2 style="margin:-0.2em 0 0.1em 0;font-size:1.35em;color:#FF2572">Tabichain Personality Match</h2>
-  <div class="row">
-    <div class="imgbox">
-      ${userImage
-      ? `<img src="${userImage}" alt="User" style="object-fit:cover;width:100%;height:100%;"/>`
-      : `<span style='color:#ff2572;opacity:.7'>No Image</span>`
-    }
-    </div>
-    <div class="vs">VS</div>
-    <div class="imgbox imgbox2">
-      <img src="${image}" alt="Tabizen" style="object-fit:cover;width:100%;height:100%;"/>
-    </div>
-  </div>
-  <div class="score">${score ?? ""}%</div>
-  <div class="txt">Your personality match!</div>
-</div>
-</body>
-</html>
-`;
-
-  // Share/download logic calling your /api/screenshot endpoint
-  const onShare = async () => {
-    setPreview(null); // clear last preview
-    const image = matchImage ?? tabizenLogo
-    const html = makeScreenshotHTML(await toBase64(image));
-    console.log(html)
-    const res = await fetch("/api/screenshot", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ html }),
-    });
-    if (!res.ok) return alert("Could not render screenshot.");
-    const blob = await res.blob();
-    const file = new File([blob], "personality-match.png", { type: "image/png" });
-
-    // Try native share
-    if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: "Tabichain Personality Match",
-        text: "Check out my result!",
-      });
-    } else {
-      // Preview below card and auto-download
-      setPreview(URL.createObjectURL(blob));
-      // Auto-download (optional)
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "personality-match.png";
-      a.click();
-    }
-  };
 
 
+ 
   return (
     <main className="flex flex-col min-h-screen w-screen items-center justify-center relative overflow-x-hidden px-4 mt-7 ">
 
@@ -273,7 +186,7 @@ export default function PersonalityMatch() {
                   <img
                     src={tabizenLogo}
                     alt="Tabichain"
-                    className="object-contain w-full h-full rounded-2xl sm:rounded-3xl"
+                    className="w-full h-full object-cover rounded-2xl sm:rounded-3xl"
                   />
                 )}
                 {(isRolling || hasRolled) && (
