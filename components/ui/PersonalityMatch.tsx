@@ -1,6 +1,6 @@
 "use client";
-import React, { useRef, useState } from "react";
-import { motion} from "motion/react";
+import React, { useRef, useState, useEffect } from "react";
+import { motion } from "motion/react";
 import { useSearchParams } from "next/navigation";
 
 const rollImages: string[] = Array.from({ length: 14 }, (_, i) => `/roll/roll${i + 1}.jpg`);
@@ -10,7 +10,7 @@ export default function PersonalityMatch() {
 
   const searchParams = useSearchParams();
   const param = searchParams.get('customOutput');
-    const parsed = param !== null ? parseInt(param, 10) : NaN;
+  const parsed = param !== null ? parseInt(param, 10) : NaN;
 
   const [userImage, setUserImage] = useState<string | null>(null);
   const [isRolling, setIsRolling] = useState(false);
@@ -19,6 +19,20 @@ export default function PersonalityMatch() {
   const [score, setScore] = useState<number | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+   useEffect(() => {
+    // Preload all images
+    Promise.all(
+      rollImages.map(
+        url =>
+          new Promise(resolve => {
+            const im = new window.Image();
+            im.onload = im.onerror = resolve;
+            im.src = url;
+          })
+      )
+    )
+  }, [])
 
   // Image upload from file
   const onUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,7 +76,7 @@ export default function PersonalityMatch() {
 
           const winner = (parsed >= 0 && parsed <= 13) ? parsed : Math.floor(Math.random() * rollImages.length);
 
-          console.log( {winner, parsed, img:rollImages[winner]});
+          console.log({ winner, parsed, img: rollImages[winner] });
           setMatchIdx(winner);
           setScore(Math.floor(83 + Math.random() * 13));
           setIsRolling(false);
@@ -101,7 +115,7 @@ export default function PersonalityMatch() {
 
 
 
- 
+
   return (
     <main className="flex flex-col min-h-screen w-screen items-center justify-center relative overflow-x-hidden px-4 mt-7 ">
 
