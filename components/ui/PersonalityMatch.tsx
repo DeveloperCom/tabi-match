@@ -20,15 +20,15 @@ export default function PersonalityMatch() {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-   useEffect(() => {
+  useEffect(() => {
     // Preload all images
     Promise.all(
       rollImages.map(
         url =>
           new Promise(resolve => {
-            const im = new window.Image();
-            im.onload = im.onerror = resolve;
-            im.src = url;
+            const img = new window.Image();
+            img.onload = img.onerror = resolve;
+            img.src = url;
           })
       )
     )
